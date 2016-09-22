@@ -14,6 +14,75 @@ namespace DbSchemeCheck
         public MainForm()
         {
             InitializeComponent();
+            InitComboBox();
+        }
+
+        private void InitComboBox()
+        {
+            var file1 = Environment.GetEnvironmentVariable("AppData") + "\\DbSchemeCheck\\TargetHistory.json";
+            if (File.Exists(file1))
+            {
+                var list = JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(file1));
+                if (list != null && list.Count > 0)
+                {
+                    foreach (var conn in list)
+                    {
+                        targetConnStringBox.Items.Add(conn);
+                    }
+                }
+            }
+            var file2 = Environment.GetEnvironmentVariable("AppData") + "\\DbSchemeCheck\\SourceHistory.json";
+            if (File.Exists(file2))
+            {
+                var list = JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(file2));
+                if (list != null && list.Count > 0)
+                {
+                    foreach (var conn in list)
+                    {
+                        srcConnStringBox.Items.Add(conn);
+                    }
+                }
+            }
+        }
+
+        private void UpdateSrouceHistory(string conn)
+        {
+            var list = new List<string>();
+            foreach (string item in srcConnStringBox.Items)
+            {
+                list.Add(item);
+            }
+            if (!list.Contains(conn))
+            {
+                list.Add(conn);
+                srcConnStringBox.Items.Add(conn);
+                var dir = Environment.GetEnvironmentVariable("AppData") + "\\DbSchemeCheck";
+                if (!Directory.Exists(dir))
+                {
+                    Directory.CreateDirectory(dir);
+                }
+                File.WriteAllText(dir + "\\SourceHistory.json", JsonConvert.SerializeObject(list));
+            }
+        }
+
+        private void UpdateTargetHistory(string conn)
+        {
+            var list = new List<string>();
+            foreach (string item in targetConnStringBox.Items)
+            {
+                list.Add(item);
+            }
+            if (!list.Contains(conn))
+            {
+                list.Add(conn);
+                targetConnStringBox.Items.Add(conn);
+                var dir = Environment.GetEnvironmentVariable("AppData") + "\\DbSchemeCheck";
+                if (!Directory.Exists(dir))
+                {
+                    Directory.CreateDirectory(dir);
+                }
+                File.WriteAllText(dir + "\\TargetHistory.json", JsonConvert.SerializeObject(list));
+            }
         }
 
         private string GetDbName(string connString)
@@ -107,12 +176,21 @@ namespace DbSchemeCheck
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message);
+                    e.Result = new WorkerResult
+                    {
+                        Success = false,
+                        Message = "错误：" + ex.Message
+                    };
                     return;
                 }
             }
             File.WriteAllText(setting.JsonFile, json);
-            e.Result = Resources.ExportSuccessMsg;
+            e.Result = new WorkerResult
+            {
+                Success = true,
+                Message = Resources.ExportSuccessMsg,
+                TargetConn = setting.TargetConnString
+            };
         }
 
         private void selectFileButton_Click(object sender, EventArgs e)
@@ -141,6 +219,17 @@ namespace DbSchemeCheck
             public string TargetDbName { get; set; }
         }
 
+        internal class WorkerResult
+        {
+            public string Message { get; set; }
+
+            public bool Success { get; set; }
+
+            public string TargetConn { get; set; }
+
+            public string SourceConn { get; set; }
+        }
+
         private void compairButton_Click(object sender, EventArgs e)
         {
             if (compareWorker.IsBusy)
@@ -161,11 +250,8 @@ namespace DbSchemeCheck
                     MessageBox.Show("原数据库" + Resources.DbNameEmptyMsg);
                     return;
                 }
-                else
-                {
-                    setting.SrcConnString = srcConnStringBox.Text;
-                    setting.SrcDbName = db1;
-                }
+                setting.SrcConnString = srcConnStringBox.Text;
+                setting.SrcDbName = db1;
             }
             else
             {
@@ -224,7 +310,11 @@ namespace DbSchemeCheck
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(this, ex.Message);
+                    e.Result = new WorkerResult
+                    {
+                        Success = false,
+                        Message = "错误：" + ex.Message
+                    };
                     return;
                 }
             }
@@ -245,15 +335,12 @@ namespace DbSchemeCheck
 
             foreach (var sTable in source)
             {
-                var tTable =
-                    target.FirstOrDefault(
-                        x => x.TableName.Equals(sTable.TableName, StringComparison.InvariantCultureIgnoreCase));
+                var tTable = target.FirstOrDefault(x => x.TableName.Equals(sTable.TableName, StringComparison.InvariantCultureIgnoreCase));
                 if (tTable == null)
                 {
                     ShowError(ref errorList, $"数据表 \"{sTable.TableName}\" 在目标数据库中不存在。");
                     continue;
                 }
-
                 #region 比较每一列
 
                 foreach (var sColumn in sTable.Columns)
@@ -266,18 +353,15 @@ namespace DbSchemeCheck
                     }
                     if (sColumn.IsPrimaryKey != tColumn.IsPrimaryKey)
                     {
-                        ShowError(ref errorList, $"数据表 \"{sTable.TableName}\" 中的列 \"{sColumn.ColumnName}\" 在原数据库中 '主键' 属性已被改变。");
-                        continue;
+                        ShowError(ref errorList, $"数据表 \"{sTable.TableName}\" 中的列 \"{sColumn.ColumnName}\" 在原数据库中 '主键' 属性已被改变。原数据库主键:{sColumn.IsPrimaryKey},目标数据库主键：{tColumn.IsPrimaryKey}。");
                     }
                     if (sColumn.IsNullable != tColumn.IsNullable)
                     {
-                        ShowError(ref errorList, $"数据表 \"{sTable.TableName}\" 中的列 \"{sColumn.ColumnName}\" 在原数据库中 '可为空' 属性已被改变。");
-                        continue;
+                        ShowError(ref errorList, $"数据表 \"{sTable.TableName}\" 中的列 \"{sColumn.ColumnName}\" 在原数据库中 '可为空' 属性已被改变。原数据库可为空:{sColumn.IsNullable},目标数据库可为空：{tColumn.IsNullable}。");
                     }
                     if (sColumn.DbType != tColumn.DbType)
                     {
-                        ShowError(ref errorList, $"数据表 \"{sTable.TableName}\" 中的列 \"{sColumn.ColumnName}\" 在原数据库中 '数据类型' 属性已被改变。");
-                        continue;
+                        ShowError(ref errorList, $"数据表 \"{sTable.TableName}\" 中的列 \"{sColumn.ColumnName}\" 在原数据库中 '数据类型' 属性已被改变。原数据库数据类型:{sColumn.DbType},目标数据库数据类型：{tColumn.DbType}。");
                     }
                 }
                 foreach (var tColumn in tTable.Columns)
@@ -286,7 +370,6 @@ namespace DbSchemeCheck
                     if (sColumn == null)
                     {
                         ShowError(ref errorList, $"数据表 \"{tTable.TableName}\" 中的列 \"{tColumn.ColumnName}\"  在原数据库中已被删除。");
-                        continue;
                     }
                 }
                 #endregion
@@ -297,24 +380,53 @@ namespace DbSchemeCheck
                 if (sTable == null)
                 {
                     ShowError(ref errorList, $"数据表 \"{tTable.TableName}\" 在原数据库中已被删除。");
-                    continue;
                 }
             }
             if (errorList.Count > 0)
             {
                 var msg = string.Join("\r\n", errorList);
-                e.Result = msg;
+                e.Result = new WorkerResult
+                {
+                    Success = false,
+                    Message = msg,
+                    SourceConn = settings.SrcConnString,
+                    TargetConn = settings.TargetConnString
+                };
             }
             else
             {
-                e.Result = "检测已完成";
+                e.Result = new WorkerResult
+                {
+                    Success = true,
+                    Message = "检测已完成,完全匹配！",
+                    TargetConn = settings.TargetConnString,
+                    SourceConn = settings.SrcConnString
+                };
             }
             #endregion
         }
 
         private void compareWorker_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
         {
-            outputBox.Text = e.Result as string;
+            var result = (WorkerResult) e.Result;
+            if (!string.IsNullOrEmpty(result.TargetConn))
+            {
+                UpdateTargetHistory(result.TargetConn);
+            }
+            if (!string.IsNullOrEmpty(result.SourceConn))
+            {
+                UpdateSrouceHistory(result.SourceConn);
+            }
+            outputBox.Text = result.Message;
+        }
+
+        private void outputBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Control && e.KeyCode == Keys.A)
+            {
+                outputBox.SelectAll();
+                e.SuppressKeyPress = false;
+            }
         }
     }
 }

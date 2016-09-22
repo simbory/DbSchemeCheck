@@ -31,13 +31,11 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.exportButton = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
-            this.targetConnStringBox = new System.Windows.Forms.TextBox();
             this.jsonFilePathBox = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.selectFileButton = new System.Windows.Forms.Button();
             this.selectFileDlalog = new System.Windows.Forms.OpenFileDialog();
             this.compairButton = new System.Windows.Forms.Button();
-            this.srcConnStringBox = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.targetGroupBox = new System.Windows.Forms.GroupBox();
@@ -47,6 +45,8 @@
             this.outputBox = new System.Windows.Forms.TextBox();
             this.compareWorker = new System.ComponentModel.BackgroundWorker();
             this.exportWorker = new System.ComponentModel.BackgroundWorker();
+            this.targetConnStringBox = new System.Windows.Forms.ComboBox();
+            this.srcConnStringBox = new System.Windows.Forms.ComboBox();
             this.targetGroupBox.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.outputGroupBox.SuspendLayout();
@@ -57,7 +57,7 @@
             this.exportButton.Location = new System.Drawing.Point(692, 48);
             this.exportButton.Name = "exportButton";
             this.exportButton.Size = new System.Drawing.Size(75, 23);
-            this.exportButton.TabIndex = 0;
+            this.exportButton.TabIndex = 1;
             this.exportButton.Text = "导出表信息";
             this.exportButton.UseVisualStyleBackColor = true;
             this.exportButton.Click += new System.EventHandler(this.button1_Click);
@@ -72,19 +72,12 @@
             this.label1.TabIndex = 1;
             this.label1.Text = "连接字符串";
             // 
-            // targetConnStringBox
-            // 
-            this.targetConnStringBox.Location = new System.Drawing.Point(77, 20);
-            this.targetConnStringBox.Name = "targetConnStringBox";
-            this.targetConnStringBox.Size = new System.Drawing.Size(690, 21);
-            this.targetConnStringBox.TabIndex = 2;
-            // 
             // jsonFilePathBox
             // 
             this.jsonFilePathBox.Location = new System.Drawing.Point(77, 23);
             this.jsonFilePathBox.Name = "jsonFilePathBox";
             this.jsonFilePathBox.Size = new System.Drawing.Size(646, 21);
-            this.jsonFilePathBox.TabIndex = 6;
+            this.jsonFilePathBox.TabIndex = 2;
             // 
             // label3
             // 
@@ -101,7 +94,7 @@
             this.selectFileButton.Location = new System.Drawing.Point(729, 22);
             this.selectFileButton.Name = "selectFileButton";
             this.selectFileButton.Size = new System.Drawing.Size(38, 23);
-            this.selectFileButton.TabIndex = 7;
+            this.selectFileButton.TabIndex = 3;
             this.selectFileButton.Text = "...";
             this.selectFileButton.UseVisualStyleBackColor = true;
             this.selectFileButton.Click += new System.EventHandler(this.selectFileButton_Click);
@@ -116,17 +109,10 @@
             this.compairButton.Location = new System.Drawing.Point(692, 100);
             this.compairButton.Name = "compairButton";
             this.compairButton.Size = new System.Drawing.Size(75, 23);
-            this.compairButton.TabIndex = 8;
+            this.compairButton.TabIndex = 5;
             this.compairButton.Text = "开始比较";
             this.compairButton.UseVisualStyleBackColor = true;
             this.compairButton.Click += new System.EventHandler(this.compairButton_Click);
-            // 
-            // srcConnStringBox
-            // 
-            this.srcConnStringBox.Location = new System.Drawing.Point(77, 72);
-            this.srcConnStringBox.Name = "srcConnStringBox";
-            this.srcConnStringBox.Size = new System.Drawing.Size(690, 21);
-            this.srcConnStringBox.TabIndex = 10;
             // 
             // label5
             // 
@@ -150,8 +136,8 @@
             // 
             // targetGroupBox
             // 
-            this.targetGroupBox.Controls.Add(this.label1);
             this.targetGroupBox.Controls.Add(this.targetConnStringBox);
+            this.targetGroupBox.Controls.Add(this.label1);
             this.targetGroupBox.Controls.Add(this.exportButton);
             this.targetGroupBox.Location = new System.Drawing.Point(15, 13);
             this.targetGroupBox.Name = "targetGroupBox";
@@ -162,13 +148,13 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.srcConnStringBox);
             this.groupBox1.Controls.Add(this.label3);
             this.groupBox1.Controls.Add(this.jsonFilePathBox);
             this.groupBox1.Controls.Add(this.label6);
             this.groupBox1.Controls.Add(this.selectFileButton);
             this.groupBox1.Controls.Add(this.compairButton);
             this.groupBox1.Controls.Add(this.label5);
-            this.groupBox1.Controls.Add(this.srcConnStringBox);
             this.groupBox1.Location = new System.Drawing.Point(15, 102);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(773, 133);
@@ -194,14 +180,15 @@
             // 
             // outputBox
             // 
-            this.outputBox.Enabled = false;
             this.outputBox.ForeColor = System.Drawing.Color.Black;
             this.outputBox.Location = new System.Drawing.Point(8, 20);
             this.outputBox.Multiline = true;
             this.outputBox.Name = "outputBox";
             this.outputBox.ReadOnly = true;
+            this.outputBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.outputBox.Size = new System.Drawing.Size(759, 172);
-            this.outputBox.TabIndex = 0;
+            this.outputBox.TabIndex = 6;
+            this.outputBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.outputBox_KeyDown);
             // 
             // compareWorker
             // 
@@ -212,6 +199,22 @@
             // 
             this.exportWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.exportWorker_DoWork);
             this.exportWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.compareWorker_RunWorkerCompleted);
+            // 
+            // targetConnStringBox
+            // 
+            this.targetConnStringBox.FormattingEnabled = true;
+            this.targetConnStringBox.Location = new System.Drawing.Point(83, 20);
+            this.targetConnStringBox.Name = "targetConnStringBox";
+            this.targetConnStringBox.Size = new System.Drawing.Size(684, 20);
+            this.targetConnStringBox.TabIndex = 0;
+            // 
+            // srcConnStringBox
+            // 
+            this.srcConnStringBox.FormattingEnabled = true;
+            this.srcConnStringBox.Location = new System.Drawing.Point(77, 73);
+            this.srcConnStringBox.Name = "srcConnStringBox";
+            this.srcConnStringBox.Size = new System.Drawing.Size(690, 20);
+            this.srcConnStringBox.TabIndex = 4;
             // 
             // MainForm
             // 
@@ -241,13 +244,11 @@
 
         private System.Windows.Forms.Button exportButton;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.TextBox targetConnStringBox;
         private System.Windows.Forms.TextBox jsonFilePathBox;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Button selectFileButton;
         private System.Windows.Forms.OpenFileDialog selectFileDlalog;
         private System.Windows.Forms.Button compairButton;
-        private System.Windows.Forms.TextBox srcConnStringBox;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.GroupBox targetGroupBox;
@@ -257,6 +258,8 @@
         private System.Windows.Forms.TextBox outputBox;
         private System.ComponentModel.BackgroundWorker compareWorker;
         private System.ComponentModel.BackgroundWorker exportWorker;
+        private System.Windows.Forms.ComboBox targetConnStringBox;
+        private System.Windows.Forms.ComboBox srcConnStringBox;
     }
 }
 
