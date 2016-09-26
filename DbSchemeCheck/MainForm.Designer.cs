@@ -39,14 +39,14 @@
             this.label5 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.targetGroupBox = new System.Windows.Forms.GroupBox();
+            this.targetConnStringBox = new System.Windows.Forms.ComboBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.srcConnStringBox = new System.Windows.Forms.ComboBox();
             this.saveJsonFileDialog = new System.Windows.Forms.SaveFileDialog();
             this.outputGroupBox = new System.Windows.Forms.GroupBox();
             this.outputBox = new System.Windows.Forms.TextBox();
             this.compareWorker = new System.ComponentModel.BackgroundWorker();
             this.exportWorker = new System.ComponentModel.BackgroundWorker();
-            this.targetConnStringBox = new System.Windows.Forms.ComboBox();
-            this.srcConnStringBox = new System.Windows.Forms.ComboBox();
             this.targetGroupBox.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.outputGroupBox.SuspendLayout();
@@ -146,6 +146,14 @@
             this.targetGroupBox.TabStop = false;
             this.targetGroupBox.Text = "目标数据库";
             // 
+            // targetConnStringBox
+            // 
+            this.targetConnStringBox.FormattingEnabled = true;
+            this.targetConnStringBox.Location = new System.Drawing.Point(83, 20);
+            this.targetConnStringBox.Name = "targetConnStringBox";
+            this.targetConnStringBox.Size = new System.Drawing.Size(684, 20);
+            this.targetConnStringBox.TabIndex = 0;
+            // 
             // groupBox1
             // 
             this.groupBox1.Controls.Add(this.srcConnStringBox);
@@ -161,6 +169,14 @@
             this.groupBox1.TabIndex = 15;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "原数据库";
+            // 
+            // srcConnStringBox
+            // 
+            this.srcConnStringBox.FormattingEnabled = true;
+            this.srcConnStringBox.Location = new System.Drawing.Point(77, 73);
+            this.srcConnStringBox.Name = "srcConnStringBox";
+            this.srcConnStringBox.Size = new System.Drawing.Size(690, 20);
+            this.srcConnStringBox.TabIndex = 4;
             // 
             // saveJsonFileDialog
             // 
@@ -200,22 +216,6 @@
             this.exportWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.exportWorker_DoWork);
             this.exportWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.compareWorker_RunWorkerCompleted);
             // 
-            // targetConnStringBox
-            // 
-            this.targetConnStringBox.FormattingEnabled = true;
-            this.targetConnStringBox.Location = new System.Drawing.Point(83, 20);
-            this.targetConnStringBox.Name = "targetConnStringBox";
-            this.targetConnStringBox.Size = new System.Drawing.Size(684, 20);
-            this.targetConnStringBox.TabIndex = 0;
-            // 
-            // srcConnStringBox
-            // 
-            this.srcConnStringBox.FormattingEnabled = true;
-            this.srcConnStringBox.Location = new System.Drawing.Point(77, 73);
-            this.srcConnStringBox.Name = "srcConnStringBox";
-            this.srcConnStringBox.Size = new System.Drawing.Size(690, 20);
-            this.srcConnStringBox.TabIndex = 4;
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -227,6 +227,8 @@
             this.Controls.Add(this.targetGroupBox);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
+            this.MaximumSize = new System.Drawing.Size(816, 493);
+            this.MinimumSize = new System.Drawing.Size(816, 493);
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "数据库架构比较工具";
